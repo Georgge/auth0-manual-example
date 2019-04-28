@@ -1,22 +1,34 @@
 import React, { useEffect, useState } from 'react';
-import { login, handleAutentication, signUp } from './Auth/Auth';
+import { login, handleAutentication, signUp, logOut } from './Auth/Auth';
 
 import './App.css';
 
 function App() {
   const [state, setState] = useState({
-    name: '',
+    name: false,
     picture: '',
     password_error: false,
   });
 
   useEffect(() => { handleAutentication(setState); }, []);
+
+  const localUser = localStorage.getItem('user');
+
   return (
     <div className="App">
       <div>
-        <h2>{`Hi ${state.name}`}</h2>
-        <img src={state.picture} width="100" />
+        {
+          state.name
+            ? <div>
+              <h2>{`Hi ${state.name}`}</h2>
+              <img src={state.picture} width="100" />
+            </div>
+            : <div>Not session</div>
+        }
       </div>
+      <button type="button" onClick={() => {
+        logOut(setState);
+      }}>Log Out</button>
       <div style={{ marginBottom: '32px'}}>
         <div>
           <label>Email</label>

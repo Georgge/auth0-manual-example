@@ -3,8 +3,8 @@ import auth0 from 'auth0-js';
 // OJO: configurar lo de abajo
 
 const webAuth = new auth0.WebAuth({
-  domain: 'Aqui Tu Dominio',
-  clientID: 'Aqui Tu ID de Cliente',
+  domain: process.env.REACT_APP_DOMAIN,
+  clientID: process.env.REACT_APP_CLIENTID,
   responseType: 'token id_token',
   scope: 'openid profile',
   redirectUri: 'http://localhost:3000/', // cambiar la URI si es necesario
@@ -38,21 +38,41 @@ const signUp = ({ email, password, setState}) => {
 const handleAutentication = (setState) => {
   // Este metodo escucha la URL para recuperar los datos
   // ... se ejecuta en el effect
-  webAuth.parseHash((error, result) => {
+  const localUser = localStorage.getItem('user');
+
+  webAuth.parseHash((error, result = {}) => {
     if (result) {
       const { idTokenPayload } = result;
+      console.log(idTokenPayload);
 
-      setState({
-        name: idTokenPayload.name,
-        picture: idTokenPayload.picture,
-      })
+      setState(idTokenPayload);
+
+      localStorage.setItem('user', JSON.stringify(idTokenPayload));
+    } 
+
+    if (localUser) {
+      setState(JSON.parse(localUser));
     }
     console.log('Oops!', error);
   });
 };
 
+const logOut = (setState) => {
+  webAuth.logout({
+    returnTo: 'http://localhost:3000/',
+    client_id: process.env.REACT_APP_CLIENTID,
+  })
+
+  localStorage.removeItem('user');
+  setState({
+    name: '',
+    picture: '',
+    password_error: false,
+  })
+}
 export {
   login,
   signUp,
   handleAutentication,
+  logOut,
 }
